@@ -65,14 +65,15 @@ export default function Dashboard({ email }: { email: string }) {
     setChartPeriod(p);
     localStorage.setItem("chartPeriod", p);
   };
-  const [targetLeanMass, setTargetLeanMass] = useState<string>(() =>
-    typeof window !== "undefined" ? localStorage.getItem("targetLeanMass") ?? "" : ""
-  );
+  const [targetLeanMass, setTargetLeanMass] = useState<string>("");
 
-  const updateTargetLeanMass = (v: string) => {
+  const updateTargetLeanMass = async (v: string) => {
     setTargetLeanMass(v);
-    if (v) localStorage.setItem("targetLeanMass", v);
-    else localStorage.removeItem("targetLeanMass");
+    await fetch("/api/settings", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ target_lean_mass: v }),
+    });
   };
 
   const showToast = (msg: string, error = false) => {
@@ -85,7 +86,12 @@ export default function Dashboard({ email }: { email: string }) {
     if (res.ok) setMeasurements(await res.json());
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+    fetch("/api/settings").then(r => r.json()).then(d => {
+      if (d.target_lean_mass) setTargetLeanMass(d.target_lean_mass.toString());
+    });
+  }, [load]);
 
   async function handleCsvImport(file: File) {
     setCsvImporting(true);
