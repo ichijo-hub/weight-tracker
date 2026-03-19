@@ -5,7 +5,6 @@ export interface Measurement {
   weight: number;
   body_fat_percent: number | null;
   lean_mass: number | null;
-  note: string;
   created_at: string;
 }
 

@@ -21,7 +21,7 @@ export async function POST(request: Request) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await request.json();
-  const { weight, body_fat_percent, measured_at, note } = body;
+  const { weight, body_fat_percent, measured_at } = body;
 
   if (!weight || !measured_at) {
     return NextResponse.json({ error: "weight と measured_at は必須です" }, { status: 400 });
@@ -38,7 +38,6 @@ export async function POST(request: Request) {
     weight,
     body_fat_percent: body_fat_percent ?? null,
     lean_mass,
-    note: note ?? "",
   });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

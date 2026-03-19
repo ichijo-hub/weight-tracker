@@ -11,7 +11,7 @@ export async function PUT(
 
   const { id } = await params;
   const body = await request.json();
-  const { weight, body_fat_percent, measured_at, note } = body;
+  const { weight, body_fat_percent, measured_at } = body;
 
   if (!weight || !measured_at) {
     return NextResponse.json({ error: "weight と measured_at は必須です" }, { status: 400 });
@@ -24,7 +24,7 @@ export async function PUT(
 
   const { error } = await supabase
     .from("measurements")
-    .update({ measured_at, weight, body_fat_percent: body_fat_percent ?? null, lean_mass, note: note ?? "" })
+    .update({ measured_at, weight, body_fat_percent: body_fat_percent ?? null, lean_mass })
     .eq("id", id)
     .eq("user_id", user.id);
 

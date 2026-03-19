@@ -21,7 +21,6 @@ interface FormState {
   measured_at: string;
   weight: string;
   body_fat_percent: string;
-  note: string;
 }
 
 function filteredMeasurements(measurements: Measurement[], period: "1m" | "3m" | "6m" | "1y" | "all"): Measurement[] {
@@ -37,7 +36,6 @@ const emptyForm = (): FormState => ({
   measured_at: today(),
   weight: "",
   body_fat_percent: "",
-  note: "",
 });
 
 export default function Dashboard({ email }: { email: string }) {
@@ -179,7 +177,6 @@ export default function Dashboard({ email }: { email: string }) {
         measured_at: data.measured_date ?? today(),
         weight: data.weight?.toString() ?? "",
         body_fat_percent: data.body_fat_percent?.toString() ?? "",
-        note: "",
       });
     } catch {
       showToast("通信エラーが発生しました", true);
@@ -200,7 +197,6 @@ export default function Dashboard({ email }: { email: string }) {
         weight: parseFloat(pendingForm.weight),
         body_fat_percent: pendingForm.body_fat_percent ? parseFloat(pendingForm.body_fat_percent) : null,
         measured_at: pendingForm.measured_at,
-        note: pendingForm.note,
       }),
     });
     if (!res.ok) { showToast("保存に失敗しました", true); return; }
@@ -222,7 +218,6 @@ export default function Dashboard({ email }: { email: string }) {
         weight: parseFloat(manualForm.weight),
         body_fat_percent: manualForm.body_fat_percent ? parseFloat(manualForm.body_fat_percent) : null,
         measured_at: manualForm.measured_at,
-        note: manualForm.note,
       }),
     });
     if (!res.ok) { showToast("保存に失敗しました", true); return; }
@@ -243,7 +238,6 @@ export default function Dashboard({ email }: { email: string }) {
         weight: parseFloat(editForm.weight),
         body_fat_percent: editForm.body_fat_percent ? parseFloat(editForm.body_fat_percent) : null,
         measured_at: editForm.measured_at,
-        note: editForm.note,
       }),
     });
     if (!res.ok) { showToast("更新に失敗しました", true); return; }
@@ -509,10 +503,10 @@ export default function Dashboard({ email }: { email: string }) {
             <p className="text-center text-gray-400 text-sm py-8">データがありません</p>
           ) : (
             <div>
-              <div className="overflow-x-auto"><table className="w-full text-sm">
+              <div className="overflow-x-auto"><table className="w-full text-xs">
                 <thead>
                   <tr className="text-xs text-gray-400 font-semibold uppercase tracking-wide">
-                    <th className="py-2 px-2">
+                    <th className="py-2 px-1">
                       <input
                         type="checkbox"
                         checked={selectedIds.size === measurements.length}
@@ -521,18 +515,17 @@ export default function Dashboard({ email }: { email: string }) {
                         }
                       />
                     </th>
-                    <th className="text-left py-2 px-2">日付</th>
-                    <th className="text-right py-2 px-2">体重</th>
-                    <th className="text-right py-2 px-2">体脂肪率</th>
-                    <th className="text-right py-2 px-2">除脂肪体重</th>
-                    <th className="text-left py-2 px-2">メモ</th>
-                    <th className="py-2 px-2"></th>
+                    <th className="text-left py-2 px-1">日付</th>
+                    <th className="text-right py-2 px-1">体重</th>
+                    <th className="text-right py-2 px-1">体脂肪率</th>
+                    <th className="text-right py-2 px-1">除脂肪体重</th>
+                    <th className="py-2 px-1"></th>
                   </tr>
                 </thead>
                 <tbody>
                   {([...measurements].reverse().slice(0, tableExpanded ? undefined : 7)).map(m => (
                     <tr key={m.id} className={`border-t border-gray-50 hover:bg-gray-50/50 ${selectedIds.has(m.id) ? "bg-blue-50/50" : ""}`}>
-                      <td className="py-2.5 px-2">
+                      <td className="py-2 px-1">
                         <input
                           type="checkbox"
                           checked={selectedIds.has(m.id)}
@@ -543,14 +536,13 @@ export default function Dashboard({ email }: { email: string }) {
                           }}
                         />
                       </td>
-                      <td className="py-2.5 px-2 font-medium">{m.measured_at}</td>
-                      <td className="py-2.5 px-2 text-right">{m.weight} kg</td>
-                      <td className="py-2.5 px-2 text-right">{m.body_fat_percent != null ? `${m.body_fat_percent}%` : "-"}</td>
-                      <td className="py-2.5 px-2 text-right text-green-600 font-medium">
-                        {m.lean_mass != null ? `${m.lean_mass} kg` : "-"}
+                      <td className="py-2 px-1 font-medium whitespace-nowrap">{m.measured_at}</td>
+                      <td className="py-2 px-1 text-right whitespace-nowrap">{m.weight}kg</td>
+                      <td className="py-2 px-1 text-right whitespace-nowrap">{m.body_fat_percent != null ? `${m.body_fat_percent}%` : "-"}</td>
+                      <td className="py-2 px-1 text-right text-green-600 font-medium whitespace-nowrap">
+                        {m.lean_mass != null ? `${m.lean_mass}kg` : "-"}
                       </td>
-                      <td className="py-2.5 px-2 text-gray-400">{m.note || "-"}</td>
-                      <td className="py-2.5 px-2">
+                      <td className="py-2 px-1">
                         <div className="flex gap-1 justify-end">
                           <button
                             onClick={() => {
@@ -559,7 +551,6 @@ export default function Dashboard({ email }: { email: string }) {
                                 measured_at: m.measured_at,
                                 weight: m.weight.toString(),
                                 body_fat_percent: m.body_fat_percent?.toString() ?? "",
-                                note: m.note ?? "",
                               });
                             }}
                             className="text-xs text-blue-600 hover:underline px-1"
@@ -661,10 +652,6 @@ function FormGrid({ form, onChange }: {
       <div>
         <label className="label">体脂肪率 (%)</label>
         <input type="number" step="0.1" min="0" max="100" className="input" value={form.body_fat_percent} onChange={set("body_fat_percent")} placeholder="18.0" />
-      </div>
-      <div>
-        <label className="label">メモ</label>
-        <input type="text" className="input" value={form.note} onChange={set("note")} placeholder="任意" />
       </div>
       <div className="col-span-2 bg-blue-50 rounded-lg px-4 py-3 flex justify-between items-center">
         <span className="text-sm text-gray-600">除脂肪体重（体重 × (1 - 体脂肪率)）</span>
